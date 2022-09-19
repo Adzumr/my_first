@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:map_exam/edit_screen.dart';
 import 'package:provider/provider.dart';
 
+import 'main.dart';
 import 'state_managment.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,9 +21,11 @@ class _HomeScreenState extends State<HomeScreen> {
   String? pageTitle;
   final titleController = TextEditingController();
   final contentController = TextEditingController();
-  final userid = FirebaseAuth.instance.currentUser!.uid;
-  final CollectionReference _collectionReference =
-      FirebaseFirestore.instance.collection("myFirst_Notes__");
+
+  final CollectionReference _collectionReference = FirebaseFirestore.instance
+      .collection("myFirst_Notes__")
+      .doc(userid)
+      .collection("Notes");
 
   @override
   Widget build(BuildContext context) {
@@ -136,13 +138,38 @@ class _HomeScreenState extends State<HomeScreen> {
                                       const SizedBox(width: 20),
                                       InkWell(
                                         onTap: () {
-                                          data
-                                              .deleteNote(
-                                            documentId: documentSnapshot.id,
-                                          )
-                                              .then((value) {
-                                            setState(() {});
-                                          });
+                                          showDialog(
+                                            context: context,
+                                            builder: ((context) {
+                                              return AlertDialog(
+                                                title: const Text("Delete"),
+                                                content:
+                                                    const Text("Are You Sure?"),
+                                                actions: [
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      data
+                                                          .deleteNote(
+                                                        documentId:
+                                                            documentSnapshot.id,
+                                                      )
+                                                          .then((value) {
+                                                        setState(() {});
+                                                        Navigator.pop(context);
+                                                      });
+                                                    },
+                                                    child: const Text("Yes"),
+                                                  ),
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text("Cancel"),
+                                                  ),
+                                                ],
+                                              );
+                                            }),
+                                          );
                                         },
                                         child: const Icon(Icons.delete),
                                       ),

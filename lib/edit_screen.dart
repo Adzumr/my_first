@@ -64,16 +64,62 @@ class _EditScreenState extends State<EditScreen> {
                             (route) => false,
                           )
                         : pageTitleController.text == "Edit Note"
-                            ? data.updateNote(
-                                id: widget.id,
-                                title: titleController.text,
-                                contentDetail: contentController.text,
+                            ? showDialog(
                                 context: context,
+                                builder: ((context) {
+                                  return AlertDialog(
+                                    title: const Text("Update"),
+                                    content: const Text("Are You Sure?"),
+                                    actions: [
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          data.updateNote(
+                                            id: widget.id,
+                                            title: titleController.text,
+                                            contentDetail:
+                                                contentController.text,
+                                            context: context,
+                                          );
+                                        },
+                                        child: const Text("Yes"),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("Cancel"),
+                                      ),
+                                    ],
+                                  );
+                                }),
                               )
-                            : data.addNote(
-                                title: titleController.text,
-                                contentDetail: contentController.text,
-                                context: context);
+                            : showDialog(
+                                context: context,
+                                builder: ((context) {
+                                  return AlertDialog(
+                                    title: const Text("Add"),
+                                    content: const Text("Are You Sure?"),
+                                    actions: [
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          data.addNote(
+                                              title: titleController.text,
+                                              contentDetail:
+                                                  contentController.text,
+                                              context: context);
+                                        },
+                                        child: const Text("Yes"),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("Cancel"),
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              );
                   },
                 )
               : const SizedBox.shrink(),

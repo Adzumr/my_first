@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:map_exam/note.dart';
 
 import 'home_screen.dart';
+import 'main.dart';
 
 class NotesProvider extends ChangeNotifier {
-  CollectionReference collectionReference =
-      FirebaseFirestore.instance.collection("myFirst_Notes__");
+  CollectionReference collectionReference = FirebaseFirestore.instance
+      .collection("myFirst_Notes__")
+      .doc(userid)
+      .collection("Notes");
   String? noteLength;
 
   List<Note>? notes;

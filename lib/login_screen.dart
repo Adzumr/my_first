@@ -36,8 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(
-            email: email!,
-            password: password!,
+            email: email!.trim(),
+            password: password!.trim(),
           )
           .then(
             (value) => Navigator.pushNamedAndRemoveUntil(

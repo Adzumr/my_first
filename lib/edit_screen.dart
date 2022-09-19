@@ -8,12 +8,14 @@ import 'package:map_exam/home_screen.dart';
 class EditScreen extends StatefulWidget {
   final String? id;
   final String? title;
+  final String? pageTitle;
   final String? contentDetail;
 
   static const String idScreen = "editScreen";
   static Route route() => MaterialPageRoute(builder: (_) => const EditScreen());
 
-  const EditScreen({this.id, this.title, this.contentDetail, Key? key})
+  const EditScreen(
+      {this.pageTitle, this.id, this.title, this.contentDetail, Key? key})
       : super(key: key);
 
   @override
@@ -23,6 +25,7 @@ class EditScreen extends StatefulWidget {
 class _EditScreenState extends State<EditScreen> {
   @override
   void initState() {
+    pageTitleController = TextEditingController(text: widget.pageTitle ?? "");
     titleController = TextEditingController(text: widget.title ?? "");
     contentController = TextEditingController(text: widget.contentDetail ?? "");
     idController = TextEditingController(text: widget.id ?? "");
@@ -33,19 +36,44 @@ class _EditScreenState extends State<EditScreen> {
   final userid = FirebaseAuth.instance.currentUser!.uid;
   final CollectionReference _collectionReference =
       FirebaseFirestore.instance.collection("myFirst_Notes");
+  TextEditingController pageTitleController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
   TextEditingController idController = TextEditingController();
   String? title;
   String? content;
+  Future addNote() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      log(titleController.text);
+      log(contentController.text);
+      await _collectionReference.add({
+        "title": titleController.text,
+        "contentDetail": contentController.text,
+      }).then(
+        (value) => Navigator.pushNamedAndRemoveUntil(
+          context,
+          HomeScreen.idScreen,
+          (route) => false,
+        ),
+      );
+    } catch (e) {
+      log(e.toString());
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   Future updateNote() async {
     try {
       setState(() {
         isLoading = true;
       });
-      log(idController.text);
-      log(titleController.text);
-      log(contentController.text);
+
       await _collectionReference.doc(idController.text).update({
         "id": idController.text,
         "title": titleController.text,
@@ -72,17 +100,27 @@ class _EditScreenState extends State<EditScreen> {
       appBar: AppBar(
         leading: Container(),
         centerTitle: true,
-        title: const Text('Edit Note'),
+        title: Text(pageTitleController.text),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.check_circle,
-              size: 30,
-            ),
-            onPressed: () async {
-              updateNote();
-            },
-          ),
+          pageTitleController.text != "View Note"
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.check_circle,
+                    size: 30,
+                  ),
+                  onPressed: () async {
+                    pageTitleController.text == "View Note"
+                        ? Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            HomeScreen.idScreen,
+                            (route) => false,
+                          )
+                        : pageTitleController.text == "Edit Note"
+                            ? updateNote()
+                            : addNote();
+                  },
+                )
+              : const SizedBox.shrink(),
           IconButton(
             icon: const Icon(
               Icons.cancel_sharp,
@@ -107,7 +145,8 @@ class _EditScreenState extends State<EditScreen> {
               child: Column(
                 children: [
                   TextFormField(
-                    enabled: true,
+                    enabled:
+                        pageTitleController.text == "View Note" ? false : true,
                     controller: titleController,
                     decoration: const InputDecoration(
                       hintText: 'Type the title here',
@@ -117,7 +156,9 @@ class _EditScreenState extends State<EditScreen> {
                   const SizedBox(height: 5),
                   Expanded(
                     child: TextFormField(
-                        enabled: true,
+                        enabled: pageTitleController.text == "View Note"
+                            ? false
+                            : true,
                         controller: contentController,
                         maxLines: null,
                         expands: true,

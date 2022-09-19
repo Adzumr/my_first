@@ -3,9 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:map_exam/add_screen.dart';
 import 'package:map_exam/edit_screen.dart';
-import 'package:map_exam/view_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'state_managment.dart';
@@ -22,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isExpanded = false;
   bool showEdit = false;
+  String? pageTitle;
   final titleController = TextEditingController();
   final contentController = TextEditingController();
   final userid = FirebaseAuth.instance.currentUser!.uid;
@@ -92,10 +91,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           Flexible(
                             child: InkWell(
                               onTap: () {
+                                setState(() {
+                                  pageTitle = "View Note";
+                                });
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ViewScreen(
+                                    builder: (context) => EditScreen(
+                                      pageTitle: pageTitle,
+                                      id: documentSnapshot.id,
                                       title: documentSnapshot["title"],
                                       contentDetail:
                                           documentSnapshot["contentDetail"],
@@ -125,22 +129,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Row(
                                     children: [
                                       InkWell(
-                                          onTap: () async {
-                                            final String title =
-                                                documentSnapshot["title"];
-                                            final String contentDetail =
-                                                documentSnapshot[
-                                                    "contentDetail"];
-                                            final String noteId =
-                                                documentSnapshot.id;
-                                            await Navigator.push(
+                                          onTap: () {
+                                            setState(() {
+                                              pageTitle = "Edit Note";
+                                            });
+                                            Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     EditScreen(
-                                                  id: noteId,
-                                                  title: title,
-                                                  contentDetail: contentDetail,
+                                                  pageTitle: pageTitle,
+                                                  id: documentSnapshot.id,
+                                                  title:
+                                                      documentSnapshot["title"],
+                                                  contentDetail:
+                                                      documentSnapshot[
+                                                          "contentDetail"],
                                                 ),
                                               ),
                                             );
@@ -194,10 +198,16 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Icon(Icons.add),
             tooltip: 'Add a new note',
             onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
+              setState(() {
+                pageTitle = "Add New Note";
+              });
+              Navigator.push(
                 context,
-                AddScreen.idScreen,
-                (route) => false,
+                MaterialPageRoute(
+                  builder: (context) => EditScreen(
+                    pageTitle: pageTitle,
+                  ),
+                ),
               );
             },
           ),

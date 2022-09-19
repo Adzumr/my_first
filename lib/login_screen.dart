@@ -41,7 +41,10 @@ class _LoginScreenState extends State<LoginScreen> {
           )
           .then(
             (value) => Navigator.pushNamedAndRemoveUntil(
-                context, HomeScreen.idScreen, (route) => false),
+              context,
+              HomeScreen.idScreen,
+              (route) => false,
+            ),
           );
     } catch (e) {
       log(

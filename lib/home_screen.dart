@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final count = Provider.of<NotesProvider>(context);
+    final data = Provider.of<NotesProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
           CircleAvatar(
             backgroundColor: Colors.blue.shade200,
             child: Text(
-              "${count.getNoteCount}",
+              "${data.getNoteCount}",
               style:
                   const TextStyle(fontWeight: FontWeight.bold, fontSize: 22.0),
             ),

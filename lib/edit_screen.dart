@@ -64,61 +64,16 @@ class _EditScreenState extends State<EditScreen> {
                             (route) => false,
                           )
                         : pageTitleController.text == "Edit Note"
-                            ? showDialog(
+                            ? data.updateNote(
+                                id: widget.id,
+                                title: titleController.text,
+                                contentDetail: contentController.text,
                                 context: context,
-                                builder: ((context) {
-                                  return AlertDialog(
-                                    title: const Text("Update"),
-                                    content: const Text("Are You Sure?"),
-                                    actions: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          data.updateNote(
-                                            id: widget.id,
-                                            title: titleController.text,
-                                            contentDetail:
-                                                contentController.text,
-                                            context: context,
-                                          );
-                                        },
-                                        child: const Text("Yes"),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text("Cancel"),
-                                      ),
-                                    ],
-                                  );
-                                }),
                               )
-                            : showDialog(
+                            : data.addNote(
+                                title: titleController.text,
+                                contentDetail: contentController.text,
                                 context: context,
-                                builder: ((context) {
-                                  return AlertDialog(
-                                    title: const Text("Add"),
-                                    content: const Text("Are You Sure?"),
-                                    actions: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          data.addNote(
-                                              title: titleController.text,
-                                              contentDetail:
-                                                  contentController.text,
-                                              context: context);
-                                        },
-                                        child: const Text("Yes"),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text("Cancel"),
-                                      ),
-                                    ],
-                                  );
-                                }),
                               );
                   },
                 )
@@ -138,40 +93,36 @@ class _EditScreenState extends State<EditScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator.adaptive(),
-            )
-          : Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Column(
-                children: [
-                  TextFormField(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              TextFormField(
+                enabled: pageTitleController.text == "View Note" ? false : true,
+                controller: titleController,
+                decoration: const InputDecoration(
+                  hintText: 'Type the title here',
+                ),
+                onChanged: (value) {},
+              ),
+              const SizedBox(height: 5),
+              Expanded(
+                child: TextFormField(
                     enabled:
                         pageTitleController.text == "View Note" ? false : true,
-                    controller: titleController,
+                    controller: contentController,
+                    maxLines: null,
+                    expands: true,
                     decoration: const InputDecoration(
-                      hintText: 'Type the title here',
+                      hintText: 'Type the description',
                     ),
-                    onChanged: (value) {},
-                  ),
-                  const SizedBox(height: 5),
-                  Expanded(
-                    child: TextFormField(
-                        enabled: pageTitleController.text == "View Note"
-                            ? false
-                            : true,
-                        controller: contentController,
-                        maxLines: null,
-                        expands: true,
-                        decoration: const InputDecoration(
-                          hintText: 'Type the description',
-                        ),
-                        onChanged: (value) {}),
-                  ),
-                ],
+                    onChanged: (value) {}),
               ),
-            ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

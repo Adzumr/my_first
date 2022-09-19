@@ -16,6 +16,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    final data = Provider.of<NotesProvider>(context, listen: false);
+    data.getNotes();
+    super.initState();
+  }
+
   bool isExpanded = true;
   bool showEdit = false;
   String? pageTitle;
@@ -30,6 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final data = Provider.of<NotesProvider>(context);
+
+    setState(() {});
 
     return Scaffold(
       appBar: AppBar(

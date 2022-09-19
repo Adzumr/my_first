@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:map_exam/note.dart';
 
 import 'home_screen.dart';
 import 'main.dart';
@@ -13,14 +12,11 @@ class NotesProvider extends ChangeNotifier {
       .doc(userid)
       .collection("Notes");
   String? noteLength;
-
-  List<Note>? notes;
-  Future<String?> getNotes() async {
-    await collectionReference
+  getNotes() async {
+    noteLength = await collectionReference
         .get()
         .then((value) => noteLength = value.docs.length.toString());
-
-    return noteLength;
+    notifyListeners();
   }
 
   Future deleteNote({String? documentId}) async {

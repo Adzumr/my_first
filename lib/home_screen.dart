@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,22 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final contentController = TextEditingController();
   final userid = FirebaseAuth.instance.currentUser!.uid;
   final CollectionReference _collectionReference =
-      FirebaseFirestore.instance.collection("myFirst_Notes");
-  Future addNote({String? title, String? contentDetail}) async {
-    try {
-      await _collectionReference.add({
-        "id": userid,
-        "title": "$title",
-        "contentDetail": "$contentDetail",
-      }).then(
-        (value) => log(
-          value.id,
-        ),
-      );
-    } catch (e) {
-      log(e.toString());
-    }
-  }
+      FirebaseFirestore.instance.collection("myFirst_Notes__");
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
           CircleAvatar(
             backgroundColor: Colors.blue.shade200,
             child: Text(
-              "${data.getNoteCount}",
+              data.noteLength ?? "0",
               style:
                   const TextStyle(fontWeight: FontWeight.bold, fontSize: 22.0),
             ),
@@ -152,10 +135,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: const Icon(Icons.edit)),
                                       const SizedBox(width: 20),
                                       InkWell(
-                                        onTap: () async {
-                                          _collectionReference
-                                              .doc(documentSnapshot.id)
-                                              .delete();
+                                        onTap: () {
+                                          data
+                                              .deleteNote(
+                                            documentId: documentSnapshot.id,
+                                          )
+                                              .then((value) {
+                                            setState(() {});
+                                          });
                                         },
                                         child: const Icon(Icons.delete),
                                       ),

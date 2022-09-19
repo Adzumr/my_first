@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:map_exam/edit_screen.dart';
@@ -18,7 +19,7 @@ void main() async {
     child: const App(),
   ));
 }
-
+ final userid = FirebaseAuth.instance.currentUser!.uid;
 List<SingleChildWidget> providers = [
   ChangeNotifierProvider<NotesProvider>(create: (_) => NotesProvider()),
 ];

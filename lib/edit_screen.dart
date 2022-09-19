@@ -1,9 +1,9 @@
-import 'dart:developer';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:map_exam/home_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'state_managment.dart';
 
 class EditScreen extends StatefulWidget {
   final String? id;
@@ -34,68 +34,16 @@ class _EditScreenState extends State<EditScreen> {
 
   bool isLoading = false;
   final userid = FirebaseAuth.instance.currentUser!.uid;
-  final CollectionReference _collectionReference =
-      FirebaseFirestore.instance.collection("myFirst_Notes");
   TextEditingController pageTitleController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
   TextEditingController idController = TextEditingController();
   String? title;
   String? content;
-  Future addNote() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-      log(titleController.text);
-      log(contentController.text);
-      await _collectionReference.add({
-        "title": titleController.text,
-        "contentDetail": contentController.text,
-      }).then(
-        (value) => Navigator.pushNamedAndRemoveUntil(
-          context,
-          HomeScreen.idScreen,
-          (route) => false,
-        ),
-      );
-    } catch (e) {
-      log(e.toString());
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future updateNote() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-
-      await _collectionReference.doc(idController.text).update({
-        "id": idController.text,
-        "title": titleController.text,
-        "contentDetail": contentController.text,
-      }).then(
-        (value) => Navigator.pushNamedAndRemoveUntil(
-          context,
-          HomeScreen.idScreen,
-          (route) => false,
-        ),
-      );
-    } catch (e) {
-      log(e.toString());
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    final data = Provider.of<NotesProvider>(context);
     return Scaffold(
       appBar: AppBar(
         leading: Container(),
@@ -116,8 +64,16 @@ class _EditScreenState extends State<EditScreen> {
                             (route) => false,
                           )
                         : pageTitleController.text == "Edit Note"
-                            ? updateNote()
-                            : addNote();
+                            ? data.updateNote(
+                                id: widget.id,
+                                title: titleController.text,
+                                contentDetail: contentController.text,
+                                context: context,
+                              )
+                            : data.addNote(
+                                title: titleController.text,
+                                contentDetail: contentController.text,
+                                context: context);
                   },
                 )
               : const SizedBox.shrink(),

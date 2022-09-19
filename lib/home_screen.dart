@@ -18,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool isExpanded = false;
+  bool showEdit = false;
   final titleController = TextEditingController();
   final contentController = TextEditingController();
   final userid = FirebaseAuth.instance.currentUser!.uid;
@@ -41,8 +42,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ValueNotifier<int> noteCount = ValueNotifier(0);
     final count = Provider.of<NotesProvider>(context);
+    final List<bool> selected = List.generate(20, (i) => false);
 
     return Scaffold(
       appBar: AppBar(
@@ -73,18 +74,88 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (BuildContext context, int index) {
                 final DocumentSnapshot documentSnapshot =
                     snapshot.data!.docs[index];
-                count.getNoteLength(snapshot.data!.docs.length);
+                // count.getNoteLength(snapshot.data!.docs.length);
 
-                return ListTile(
-                  onTap: () async {
-                    _collectionReference.doc(documentSnapshot.id).delete();
-                  },
-                  title: Text(documentSnapshot["title"]),
-                  subtitle: isExpanded == false
-                      ? const SizedBox.shrink()
-                      : Text(documentSnapshot["contentDetail"]),
-                  trailing: const Text("Hello"),
+                return Flexible(
+                  child: InkWell(
+                    onLongPress: () {
+                      setState(() {
+                        showEdit = !showEdit;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15.0, vertical: 5.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  documentSnapshot["title"],
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  documentSnapshot["contentDetail"],
+                                ),
+                              ],
+                            ),
+                          ),
+                          showEdit
+                              ? Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.edit),
+                                      const SizedBox(width: 20),
+                                      InkWell(
+                                        onTap: () async {
+                                          _collectionReference
+                                              .doc(documentSnapshot.id)
+                                              .delete();
+                                        },
+                                        child: const Icon(Icons.delete),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : const SizedBox.shrink()
+                        ],
+                      ),
+                    ),
+                  ),
                 );
+                // ListTile(
+                //   onLongPress: () {
+                //     setState(() {
+                //       showEdit = !showEdit;
+                //     });
+                //   },
+                //   title: Text(documentSnapshot["title"]),
+                //   subtitle: isExpanded == false
+                //       ? const SizedBox.shrink()
+                //       : Text(documentSnapshot["contentDetail"]),
+                //   trailing: showEdit
+                //       ? Row(
+                //           mainAxisAlignment: MainAxisAlignment.end,
+                //           children: [
+                //             const Icon(Icons.edit),
+                //             InkWell(
+                //               onTap: () async {
+                //                 _collectionReference
+                //                     .doc(documentSnapshot.id)
+                //                     .delete();
+                //               },
+                //               child: const Icon(Icons.delete),
+                //             ),
+                //           ],
+                //         )
+                //       : const SizedBox.shrink(),
+                // );
               },
             );
           }
@@ -93,42 +164,11 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      // ListView.separated(
-      //   itemCount: 4,
-      //   separatorBuilder: (context, index) => const Divider(
-      //     color: Colors.blueGrey,
-      //   ),
-      //   itemBuilder: (context, index) => ListTile(
-      //     trailing: SizedBox(
-      //       width: 110.0,
-      //       child: Row(
-      //         mainAxisAlignment: MainAxisAlignment.end,
-      //         children: [
-      //           IconButton(
-      //             icon: const Icon(Icons.edit, color: Colors.blue),
-      //             onPressed: () {},
-      //           ),
-      //           IconButton(
-      //             icon: const Icon(
-      //               Icons.delete,
-      //               color: Colors.blue,
-      //             ),
-      //             onPressed: () {},
-      //           ),
-      //         ],
-      //       ),
-      //     ),
-      //     title: const Text('Note title'),
-      //     subtitle: const Text('Note content'),
-      //     onTap: () {},
-      //     onLongPress: () {},
-      //   ),
-      // ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            child: isExpanded
+            child: !isExpanded
                 ? const Icon(Icons.expand_circle_down_outlined)
                 : const Icon(Icons.menu),
             tooltip: 'Show less. Hide notes content',
@@ -138,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
           ),
+          const SizedBox(width: 10),
 
           /* Notes: for the "Show More" icon use: Icons.menu */
 
@@ -167,16 +208,20 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           TextButton(
                             onPressed: () async {
-                              try {
-                                addNote(
-                                  title: titleController.text,
-                                  contentDetail: contentController.text,
-                                ).then((value) => Navigator.pop(
-                                      context,
-                                    ));
-                              } catch (e) {
-                                log(e.toString());
-                              }
+                              setState(() {
+                                try {
+                                  addNote(
+                                    title: titleController.text,
+                                    contentDetail: contentController.text,
+                                  ).then((value) {
+                                    Navigator.pop(context);
+                                    titleController.clear();
+                                    contentController.clear();
+                                  });
+                                } catch (e) {
+                                  log(e.toString());
+                                }
+                              });
                             },
                             child: const Text("Add"),
                           ),
@@ -184,9 +229,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   }));
-              // setState(() {
-              //   addNote();
-              // });
             },
           ),
         ],

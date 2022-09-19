@@ -10,7 +10,7 @@ class NotesProvider extends ChangeNotifier {
 
   int? name;
   //getters:
-  int get getNoteCount => name!;
+  int get getNoteCount => name ?? 0;
 
 //Setters:
 

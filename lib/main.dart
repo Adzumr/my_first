@@ -1,7 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:map_exam/add_screen.dart';
 import 'package:map_exam/edit_screen.dart';
 import 'package:map_exam/home_screen.dart';
+import 'package:map_exam/view_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -39,6 +41,8 @@ class App extends StatelessWidget {
         HomeScreen.idScreen: (context) => const HomeScreen(),
         LoginScreen.idScreen: (context) => const LoginScreen(),
         EditScreen.idScreen: (context) => const EditScreen(),
+        ViewScreen.idScreen: (context) => const ViewScreen(),
+        AddScreen.idScreen: (context) => const AddScreen(),
       },
     );
   }

@@ -3,6 +3,9 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:map_exam/add_screen.dart';
+import 'package:map_exam/edit_screen.dart';
+import 'package:map_exam/view_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'state_managment.dart';
@@ -43,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final count = Provider.of<NotesProvider>(context);
-    final List<bool> selected = List.generate(20, (i) => false);
 
     return Scaffold(
       appBar: AppBar(
@@ -74,8 +76,6 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (BuildContext context, int index) {
                 final DocumentSnapshot documentSnapshot =
                     snapshot.data!.docs[index];
-                // count.getNoteLength(snapshot.data!.docs.length);
-
                 return Flexible(
                   child: InkWell(
                     onLongPress: () {
@@ -90,18 +90,32 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  documentSnapshot["title"],
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  documentSnapshot["contentDetail"],
-                                ),
-                              ],
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ViewScreen(
+                                      title: documentSnapshot["title"],
+                                      contentDetail:
+                                          documentSnapshot["contentDetail"],
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    documentSnapshot["title"],
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    documentSnapshot["contentDetail"],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           showEdit
@@ -110,7 +124,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                       horizontal: 15),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.edit),
+                                      InkWell(
+                                          onTap: () async {
+                                            final String title =
+                                                documentSnapshot["title"];
+                                            final String contentDetail =
+                                                documentSnapshot[
+                                                    "contentDetail"];
+                                            final String noteId =
+                                                documentSnapshot.id;
+                                            await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    EditScreen(
+                                                  id: noteId,
+                                                  title: title,
+                                                  contentDetail: contentDetail,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: const Icon(Icons.edit)),
                                       const SizedBox(width: 20),
                                       InkWell(
                                         onTap: () async {
@@ -129,33 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 );
-                // ListTile(
-                //   onLongPress: () {
-                //     setState(() {
-                //       showEdit = !showEdit;
-                //     });
-                //   },
-                //   title: Text(documentSnapshot["title"]),
-                //   subtitle: isExpanded == false
-                //       ? const SizedBox.shrink()
-                //       : Text(documentSnapshot["contentDetail"]),
-                //   trailing: showEdit
-                //       ? Row(
-                //           mainAxisAlignment: MainAxisAlignment.end,
-                //           children: [
-                //             const Icon(Icons.edit),
-                //             InkWell(
-                //               onTap: () async {
-                //                 _collectionReference
-                //                     .doc(documentSnapshot.id)
-                //                     .delete();
-                //               },
-                //               child: const Icon(Icons.delete),
-                //             ),
-                //           ],
-                //         )
-                //       : const SizedBox.shrink(),
-                // );
               },
             );
           }
@@ -186,49 +194,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Icon(Icons.add),
             tooltip: 'Add a new note',
             onPressed: () {
-              showModalBottomSheet(
-                  context: context,
-                  builder: ((context) {
-                    return SizedBox(
-                      height: 200,
-                      child: Column(
-                        // mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextFormField(
-                            controller: titleController,
-                            decoration: const InputDecoration(
-                              labelText: "Title",
-                            ),
-                          ),
-                          TextFormField(
-                            controller: contentController,
-                            decoration: const InputDecoration(
-                              labelText: "Content",
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              setState(() {
-                                try {
-                                  addNote(
-                                    title: titleController.text,
-                                    contentDetail: contentController.text,
-                                  ).then((value) {
-                                    Navigator.pop(context);
-                                    titleController.clear();
-                                    contentController.clear();
-                                  });
-                                } catch (e) {
-                                  log(e.toString());
-                                }
-                              });
-                            },
-                            child: const Text("Add"),
-                          ),
-                        ],
-                      ),
-                    );
-                  }));
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                AddScreen.idScreen,
+                (route) => false,
+              );
             },
           ),
         ],

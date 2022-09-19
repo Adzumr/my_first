@@ -5,49 +5,33 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:map_exam/home_screen.dart';
 
-class EditScreen extends StatefulWidget {
-  final String? id;
-  final String? title;
-  final String? contentDetail;
+class AddScreen extends StatefulWidget {
+  static const String idScreen = "addScreen";
+  static Route route() => MaterialPageRoute(builder: (_) => const AddScreen());
 
-  static const String idScreen = "editScreen";
-  static Route route() => MaterialPageRoute(builder: (_) => const EditScreen());
-
-  const EditScreen({this.id, this.title, this.contentDetail, Key? key})
-      : super(key: key);
+  const AddScreen({Key? key}) : super(key: key);
 
   @override
-  State<EditScreen> createState() => _EditScreenState();
+  State<AddScreen> createState() => _AddScreenState();
 }
 
-class _EditScreenState extends State<EditScreen> {
-  @override
-  void initState() {
-    titleController = TextEditingController(text: widget.title ?? "");
-    contentController = TextEditingController(text: widget.contentDetail ?? "");
-    idController = TextEditingController(text: widget.id ?? "");
-    super.initState();
-  }
-
+class _AddScreenState extends State<AddScreen> {
   bool isLoading = false;
   final userid = FirebaseAuth.instance.currentUser!.uid;
   final CollectionReference _collectionReference =
       FirebaseFirestore.instance.collection("myFirst_Notes");
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
-  TextEditingController idController = TextEditingController();
   String? title;
   String? content;
-  Future updateNote() async {
+  Future addNote() async {
     try {
       setState(() {
         isLoading = true;
       });
-      log(idController.text);
       log(titleController.text);
       log(contentController.text);
-      await _collectionReference.doc(idController.text).update({
-        "id": idController.text,
+      await _collectionReference.add({
         "title": titleController.text,
         "contentDetail": contentController.text,
       }).then(
@@ -72,7 +56,7 @@ class _EditScreenState extends State<EditScreen> {
       appBar: AppBar(
         leading: Container(),
         centerTitle: true,
-        title: const Text('Edit Note'),
+        title: const Text('Add new Note'),
         actions: [
           IconButton(
             icon: const Icon(
@@ -80,7 +64,7 @@ class _EditScreenState extends State<EditScreen> {
               size: 30,
             ),
             onPressed: () async {
-              updateNote();
+              addNote();
             },
           ),
           IconButton(

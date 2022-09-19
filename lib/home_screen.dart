@@ -16,14 +16,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isExpanded = false;
+  bool isExpanded = true;
   bool showEdit = false;
   String? pageTitle;
   final titleController = TextEditingController();
   final contentController = TextEditingController();
 
   final CollectionReference _collectionReference = FirebaseFirestore.instance
-      .collection("myFirst_Notes__")
+      .collection("myFirst_Notes__1")
       .doc(userid)
       .collection("Notes");
 
@@ -50,139 +50,147 @@ class _HomeScreenState extends State<HomeScreen> {
         stream: _collectionReference.snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasData) {
-            return ListView.separated(
-              itemCount: snapshot.data!.docs.length,
-              separatorBuilder: (BuildContext context, int index) {
-                return const Divider(
-                  color: Colors.grey,
-                );
-              },
-              itemBuilder: (BuildContext context, int index) {
-                final DocumentSnapshot documentSnapshot =
-                    snapshot.data!.docs[index];
-                return Flexible(
-                  child: InkWell(
-                    onLongPress: () {
-                      setState(() {
-                        showEdit = !showEdit;
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15.0, vertical: 5.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: InkWell(
-                              onTap: () {
-                                setState(() {
-                                  pageTitle = "View Note";
-                                });
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditScreen(
-                                      pageTitle: pageTitle,
-                                      id: documentSnapshot.id,
-                                      title: documentSnapshot["title"],
-                                      contentDetail:
-                                          documentSnapshot["contentDetail"],
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: ListView.separated(
+                itemCount: snapshot.data!.docs.length,
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider(
+                    color: Colors.grey,
+                  );
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  final DocumentSnapshot documentSnapshot =
+                      snapshot.data!.docs[index];
+                  return Flexible(
+                    child: InkWell(
+                      onLongPress: () {
+                        setState(() {
+                          showEdit = !showEdit;
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15.0, vertical: 5.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    pageTitle = "View Note";
+                                  });
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditScreen(
+                                        pageTitle: pageTitle,
+                                        id: documentSnapshot.id,
+                                        title: documentSnapshot["title"],
+                                        contentDetail:
+                                            documentSnapshot["contentDetail"],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    documentSnapshot["title"],
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    documentSnapshot["contentDetail"],
-                                  ),
-                                ],
+                                  );
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      documentSnapshot["title"],
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    isExpanded
+                                        ? Text(
+                                            documentSnapshot["contentDetail"],
+                                          )
+                                        : const SizedBox.shrink(),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          showEdit
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15),
-                                  child: Row(
-                                    children: [
-                                      InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              pageTitle = "Edit Note";
-                                            });
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    EditScreen(
-                                                  pageTitle: pageTitle,
-                                                  id: documentSnapshot.id,
-                                                  title:
-                                                      documentSnapshot["title"],
-                                                  contentDetail:
-                                                      documentSnapshot[
-                                                          "contentDetail"],
+                            showEdit
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15),
+                                    child: Row(
+                                      children: [
+                                        InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                pageTitle = "Edit Note";
+                                              });
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      EditScreen(
+                                                    pageTitle: pageTitle,
+                                                    id: documentSnapshot.id,
+                                                    title: documentSnapshot[
+                                                        "title"],
+                                                    contentDetail:
+                                                        documentSnapshot[
+                                                            "contentDetail"],
+                                                  ),
                                                 ),
-                                              ),
+                                              );
+                                            },
+                                            child: const Icon(Icons.edit)),
+                                        const SizedBox(width: 20),
+                                        InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: ((context) {
+                                                return AlertDialog(
+                                                  title: const Text("Delete"),
+                                                  content: const Text(
+                                                      "Are You Sure?"),
+                                                  actions: [
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        data
+                                                            .deleteNote(
+                                                          documentId:
+                                                              documentSnapshot
+                                                                  .id,
+                                                        )
+                                                            .then((value) {
+                                                          setState(() {});
+                                                          Navigator.pop(
+                                                              context);
+                                                        });
+                                                      },
+                                                      child: const Text("Yes"),
+                                                    ),
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child:
+                                                          const Text("Cancel"),
+                                                    ),
+                                                  ],
+                                                );
+                                              }),
                                             );
                                           },
-                                          child: const Icon(Icons.edit)),
-                                      const SizedBox(width: 20),
-                                      InkWell(
-                                        onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: ((context) {
-                                              return AlertDialog(
-                                                title: const Text("Delete"),
-                                                content:
-                                                    const Text("Are You Sure?"),
-                                                actions: [
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                      data
-                                                          .deleteNote(
-                                                        documentId:
-                                                            documentSnapshot.id,
-                                                      )
-                                                          .then((value) {
-                                                        setState(() {});
-                                                        Navigator.pop(context);
-                                                      });
-                                                    },
-                                                    child: const Text("Yes"),
-                                                  ),
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: const Text("Cancel"),
-                                                  ),
-                                                ],
-                                              );
-                                            }),
-                                          );
-                                        },
-                                        child: const Icon(Icons.delete),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : const SizedBox.shrink()
-                        ],
+                                          child: const Icon(Icons.delete),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : const SizedBox.shrink()
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             );
           }
           return const Center(
@@ -194,9 +202,9 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            child: !isExpanded
-                ? const Icon(Icons.expand_circle_down_outlined)
-                : const Icon(Icons.menu),
+            child: isExpanded
+                ? const Icon(Icons.menu)
+                : const Icon(Icons.expand_circle_down_outlined),
             tooltip: 'Show less. Hide notes content',
             onPressed: () {
               setState(() {

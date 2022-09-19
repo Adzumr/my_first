@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final contentController = TextEditingController();
 
   final CollectionReference _collectionReference = FirebaseFirestore.instance
-      .collection("myFirst_Notes__1")
+      .collection("myFirst_Notes__")
       .doc(userid)
       .collection("Notes");
 

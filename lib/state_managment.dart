@@ -9,7 +9,7 @@ import 'main.dart';
 
 class NotesProvider extends ChangeNotifier {
   CollectionReference collectionReference = FirebaseFirestore.instance
-      .collection("myFirst_Notes__1")
+      .collection("myFirst_Notes__")
       .doc(userid)
       .collection("Notes");
   String? noteLength;
@@ -28,6 +28,7 @@ class NotesProvider extends ChangeNotifier {
       await collectionReference.get().then(
             (value) => noteLength = value.docs.length.toString(),
           );
+
       return noteLength;
     });
   }
@@ -42,6 +43,7 @@ class NotesProvider extends ChangeNotifier {
         await collectionReference.get().then(
               (value) => noteLength = value.docs.length.toString(),
             );
+
         return noteLength;
       }).then((value) {
         Navigator.pushNamedAndRemoveUntil(

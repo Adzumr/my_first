@@ -3,7 +3,9 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:map_exam/edit_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'state_managment.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String idScreen = "homeScreen";
@@ -15,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future apiData;
+  bool isExpanded = false;
   final titleController = TextEditingController();
   final contentController = TextEditingController();
   final userid = FirebaseAuth.instance.currentUser!.uid;
@@ -40,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     ValueNotifier<int> noteCount = ValueNotifier(0);
+    final count = Provider.of<NotesProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -47,20 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           CircleAvatar(
             backgroundColor: Colors.blue.shade200,
-            child: ValueListenableBuilder(
-              valueListenable: noteCount,
-              builder: (context, value, _) {
-                return Text(
-                  "$value",
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 22.0),
-                );
-              },
+            child: Text(
+              "${count.getNoteCount}",
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 22.0),
             ),
-            //  const Text(
-            //   '4',
-            //   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22.0),
-            // ),
           ),
           const SizedBox(width: 10)
         ],
@@ -79,15 +73,17 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (BuildContext context, int index) {
                 final DocumentSnapshot documentSnapshot =
                     snapshot.data!.docs[index];
-
-                noteCount.value = snapshot.data!.docs.length;
+                count.getNoteLength(snapshot.data!.docs.length);
 
                 return ListTile(
                   onTap: () async {
                     _collectionReference.doc(documentSnapshot.id).delete();
                   },
                   title: Text(documentSnapshot["title"]),
-                  subtitle: Text(documentSnapshot["contentDetail"]),
+                  subtitle: isExpanded == false
+                      ? const SizedBox.shrink()
+                      : Text(documentSnapshot["contentDetail"]),
+                  trailing: const Text("Hello"),
                 );
               },
             );
@@ -132,15 +128,16 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-              child: const Icon(Icons.menu),
-              tooltip: 'Show less. Hide notes content',
-              onPressed: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  EditScreen.idScreen,
-                  (route) => false,
-                );
-              }),
+            child: isExpanded
+                ? const Icon(Icons.expand_circle_down_outlined)
+                : const Icon(Icons.menu),
+            tooltip: 'Show less. Hide notes content',
+            onPressed: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+            },
+          ),
 
           /* Notes: for the "Show More" icon use: Icons.menu */
 

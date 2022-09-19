@@ -14,7 +14,7 @@ class NotesProvider extends ChangeNotifier {
 
 //Setters:
 
-  changeProductName(int? val) {
+  getNoteLength(int? val) {
     name = val!;
     notifyListeners();
   }
